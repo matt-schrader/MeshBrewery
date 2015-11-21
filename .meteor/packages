@@ -21,3 +21,4 @@ insecure                # Allow all DB writes from clients (for prototyping)
 react
 nimble:restivus
 donaldaverill:serialport
+izzilab:material-ui

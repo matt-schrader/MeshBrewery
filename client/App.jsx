@@ -1,3 +1,9 @@
+var {
+    AppCanvas,
+    AppBar,
+    Styles
+    } = MUI;
+
 // App component - represents the whole app
 App = React.createClass({
 
@@ -6,8 +12,9 @@ App = React.createClass({
 
   getInitialState() {
     return {
-      hideCompleted: false
-    }
+      hideCompleted: false,
+      menuItem: 'Devices'
+    };
   },
 
   // Loads items from the Tasks collection and puts them on this.data.tasks
@@ -21,7 +28,8 @@ App = React.createClass({
 
     return {
       tasks: Tasks.find(query, {sort: {createdAt: -1}}).fetch(),
-      incompleteCount: Tasks.find({checked: {$ne: true}}).count()
+      incompleteCount: Tasks.find({checked: {$ne: true}}).count(),
+      devices: Devices.find({}).fetch()
     };
   },
 
@@ -54,32 +62,39 @@ App = React.createClass({
   },
 
   render() {
-    return (
-      <div className="container">
-        <header>
-          <h1>Todo List ({this.data.incompleteCount})</h1>
+    if(this.state.menuItem === 'Devices') {
+      return (<AppCanvas>
+                <AppBar title="Brewery" />
+                <div style={{padding: '80px'}}><DevicesView /></div>
+              </AppCanvas>);
+    } else {
+      return (
+        <div className="container">
+          <header>
+            <h1>Todo List ({this.data.incompleteCount})</h1>
 
-          <label className="hide-completed">
-            <input
-              type="checkbox"
-              readOnly={true}
-              checked={this.state.hideCompleted}
-              onClick={this.toggleHideCompleted} />
-            Hide Completed Tasks
-          </label>
+            <label className="hide-completed">
+              <input
+                type="checkbox"
+                readOnly={true}
+                checked={this.state.hideCompleted}
+                onClick={this.toggleHideCompleted} />
+              Hide Completed Tasks
+            </label>
 
-          <form className="new-task" onSubmit={this.handleSubmit} >
-            <input
-              type="text"
-              ref="textInput"
-              placeholder="Type to add new tasks" />
-          </form>
-        </header>
+            <form className="new-task" onSubmit={this.handleSubmit} >
+              <input
+                type="text"
+                ref="textInput"
+                placeholder="Type to add new tasks" />
+            </form>
+          </header>
 
-        <ul>
-          {this.renderTasks()}
-        </ul>
-      </div>
-    );
+          <ul>
+            {this.renderTasks()}
+          </ul>
+        </div>
+      );
+    }
   }
 });
