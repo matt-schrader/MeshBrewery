@@ -4,8 +4,11 @@ var {
   CardText,
   Avatar,
   Toggle,
-  TextField
+  TextField,
+  RaisedButton
 } = MUI;
+
+var { Colors } = MUI.Styles;
 
 DeviceView = React.createClass({
   getInitialState() {
@@ -26,6 +29,7 @@ DeviceView = React.createClass({
   },
 
   handleSave() {
+    console.log("Doing the saving stuff");
     createOrUpdateDevice({
       nodeId: this.props.device.nodeId,
       targetTemperature: this.state.targetTemperature,
@@ -74,18 +78,22 @@ DeviceView = React.createClass({
   },
 
   render() {
+    var deviceStateColor = this.state.activated ? Colors.blue500 : Colors.grey400;
+    var deviceStateInputDisplay = this.state.activated ? 'inline-block' : 'none';
+
     return (
       <Card>
         <CardHeader
           title={this.props.device.currentTemperature}
-          avatar={<Avatar>{this.props.device.nodeId}</Avatar>}>
+          avatar={<Avatar style={{backgroundColor: deviceStateColor}}>{this.props.device.nodeId}</Avatar>}>
         </CardHeader>
+
         <CardText>
           <Toggle
             name="toggleName1"
             value="toggleValue1"
             label={this.state.deviceToggleLabel}
-            style={{width: 300}}
+            style={{width: 200}}
             defaultToggled={this.state.activated}
             onToggle={this.onActivateToggled}/>
 
@@ -93,13 +101,10 @@ DeviceView = React.createClass({
             hintText="Enter Target Temperature"
             floatingLabelText="Target Temperature"
             value={this.state.targetTemperature} />
+
+          <RaisedButton label="Save" style={{marginLeft: 16, display: deviceStateInputDisplay }} primary={true} onClick={this.handleSave} />
         </CardText>
       </Card>
-      // <li>
-      //   <div className="node-identifier">{this.props.device.nodeId}</div>
-      //   {this.renderSensor()}
-      //   {this.renderTargetTemperature()}
-      // </li>
     );
   }
 });

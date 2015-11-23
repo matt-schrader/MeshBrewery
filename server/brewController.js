@@ -7,19 +7,18 @@ function lpad(str, padString, length) {
 }
 
 //or whatever your device is connected to
-
-var serialPort = new SerialPort.SerialPort("/dev/ttyUSB0", {
-    baudrate: 115200,
-    parser: SerialPort.parsers.readline('\r\n')
-});
-serialPort.on('open', function() {
-    console.log('Port open');
-});
+var open = false,
+    serialPort;
 
 //send data
 var sendToSerialPort = function(message) {
+  if(!serialPort || !serialPort.isOpen()) {
+    console.log('Cannot send message (serial port closed): ' + message);
+    return;
+  }
+
   console.log("Sending message: " + message);
-    serialPort.write(message);
+  serialPort.write(message);
 };
 
 var commands = {
@@ -72,12 +71,31 @@ var commands = {
   }
 }
 
-//receive data
-serialPort.on('data', function(data) {
-    console.log('message ' + data);
+function maintainSerialConnection() {
+  if(!serialPort || !serialPort.isOpen()) {
 
-    var args = data.split(' ');
-    if(commands[args[1]]) {
-      commands[args[1]](args.slice(2));
-    }
-});
+    serialPort = new SerialPort.SerialPort("/dev/ttyUSB0", {
+        baudrate: 115200,
+        parser: SerialPort.parsers.readline('\r\n')
+    }, false); //don't open immediately
+
+    serialPort.open(function (error) {
+      if ( error ) {
+        console.log('failed to open serial port: '+error);
+        setTimeout(maintainSerialConnection, 1000);
+      } else {
+        console.log('serial port open');
+        //receive data
+        serialPort.on('data', function(data) {
+            console.log('message ' + data);
+
+            var args = data.split(' ');
+            if(commands[args[1]]) {
+              commands[args[1]](args.slice(2));
+            }
+        });
+      }
+    });
+  }
+}
+maintainSerialConnection();
