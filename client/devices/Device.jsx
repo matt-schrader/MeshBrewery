@@ -100,6 +100,7 @@ DeviceView = React.createClass({
           <TextField
             hintText="Enter Target Temperature"
             floatingLabelText="Target Temperature"
+            onChange={this.handleTargetTemperatureChange}
             value={this.state.targetTemperature} />
 
           <RaisedButton label="Save" style={{marginLeft: 16, display: deviceStateInputDisplay }} primary={true} onClick={this.handleSave} />
