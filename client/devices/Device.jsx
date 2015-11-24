@@ -79,7 +79,6 @@ DeviceView = React.createClass({
 
   render() {
     var deviceStateColor = this.state.activated ? Colors.blue500 : Colors.grey400;
-    var deviceStateInputDisplay = this.state.activated ? 'inline-block' : 'none';
 
     return (
       <Card>
@@ -103,7 +102,7 @@ DeviceView = React.createClass({
             onChange={this.handleTargetTemperatureChange}
             value={this.state.targetTemperature} />
 
-          <RaisedButton label="Save" style={{marginLeft: 16, display: deviceStateInputDisplay }} primary={true} onClick={this.handleSave} />
+          <RaisedButton label="Save" style={{marginLeft: 16 }} primary={true} onClick={this.handleSave} />
         </CardText>
       </Card>
     );
