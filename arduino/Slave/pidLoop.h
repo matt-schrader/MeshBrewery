@@ -4,9 +4,9 @@
 double Input, Output, Setpoint;
 
 //Specify the links and initial tuning parameters
-PID myPID(&Input, &Output, &Setpoint, 10000, 500, 100, DIRECT);
+PID myPID(&Input, &Output, &Setpoint, 100, 0, 0, DIRECT);
 
-int WindowSize = 5000;
+int WindowSize = 10000;
 int BoilWindowSize = 2000;
 unsigned long windowStartTime = 0;
 unsigned long windowEndTime = 0;
@@ -51,7 +51,7 @@ void setTargetTemp(int arg_cnt, char **args) {
     Serial.println("Setting direction to forward");
     myPID.SetControllerDirection(DIRECT);
   }
-  
+
   if(isBoilCmd(args[1])) {
     Serial.println("TURNING ON BOIL MODE");
     boilingMode = true;
@@ -71,30 +71,27 @@ double isBoilMode() {
 }
 
 void doPid(void) {
-  if (Setpoint > 0 || boilingMode) {
-    Input = reading.celsius;
+  unsigned long now = millis();
+  if(boilingMode) {
+    windowStartTime = now;
+    windowEndTime = now + BoilWindowSize;
 
-    unsigned long now = millis();
-    if (windowStartTime == 0 || now > windowEndTime) {
-      if(boilingMode) {
-        windowStartTime = now;
-        windowEndTime = now + BoilWindowSize;
-        
-        if(Input < 9910) {
-          //if it's not close to boiling then keep it on permanently
-          killTime = windowEndTime + 1000; //add a second to the end time just to make sure it isn't switched off
-        } else {
-          //if we are in boil mode then run a phase cycle keeping the burner on for 60% of the time
-          killTime = now + (BoilWindowSize * 0.6);
-        }
-      } else {
-        myPID.Compute();
-        windowStartTime = now;
-        windowEndTime = now + WindowSize;
-        killTime = now + Output;
-      }
+    if(Input < 9910) {
+      //if it's not close to boiling then keep it on permanently
+      killTime = windowEndTime + 1000; //add a second to the end time just to make sure it isn't switched off
+    } else {
+      //if we are in boil mode then run a phase cycle keeping the burner on for 60% of the time
+      killTime = now + (BoilWindowSize * 0.6);
     }
-    
+  } else if (Setpoint > 0) {
+    Input = reading.celsius;
+    if (windowStartTime == 0 || now > windowEndTime) {
+      myPID.Compute();
+      windowStartTime = now;
+      windowEndTime = now + WindowSize;
+      killTime = now + Output;
+    }
+
     if (windowStartTime <= now && killTime > now) {
       digitalWrite(RelayPin, HIGH);
     } else if (now < windowEndTime) {
