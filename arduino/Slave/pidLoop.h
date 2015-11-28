@@ -4,7 +4,7 @@
 double Input, Output, Setpoint;
 
 //Specify the links and initial tuning parameters
-PID myPID(&Input, &Output, &Setpoint, 100, 0, 0, DIRECT);
+PID myPID(&Input, &Output, &Setpoint, 15, 0, 10, DIRECT);
 
 int WindowSize = 10000;
 int BoilWindowSize = 2000;
@@ -87,9 +87,19 @@ void doPid(void) {
     Input = reading.celsius;
     if (windowStartTime == 0 || now > windowEndTime) {
       myPID.Compute();
+      
       windowStartTime = now;
       windowEndTime = now + WindowSize;
       killTime = now + Output;
+      
+      Serial.print("start:");
+      Serial.print(windowStartTime);
+      Serial.print(" input:");
+      Serial.print(Input);
+      Serial.print(" output:");
+      Serial.print(Output);
+      Serial.print(" killing:");
+      Serial.println(killTime);
     }
 
     if (windowStartTime <= now && killTime > now) {
