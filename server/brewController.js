@@ -57,10 +57,8 @@ var commands = {
 
         var command = "SETT " + nodeId + " ";
 
-        if(device.boilOn) {
-          if(device.boilOn !== device.deviceBoilOn) {
+        if(device.boilOn && device.boilOn !== device.deviceBoilOn) {
             sendToSerialPort(command + "BOIL;");
-          }
         } else if(targetTemperature !== device.deviceTargetTemperature) {
           sendToSerialPort(command + device.targetTemperature + ";");
         }

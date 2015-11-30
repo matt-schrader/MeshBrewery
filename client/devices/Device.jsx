@@ -56,25 +56,10 @@ DeviceView = React.createClass({
 
     if(!toggled) {
       this.setState({
-        targetTemperature: 0
+        targetTemperature: 0,
+        boilOn: false
       })
     }
-  },
-
-  renderTargetTemperature() {
-    var device = this.props.device;
-    if(device.deviceTargetTemperature && !device.targetTemperature) {
-      return <div class="error">The device has a target temperature but the system thinks it should be off, something might not have synced up properly</div>
-    }
-
-    return (<div><br />
-        <input type="checkbox" name="boil" checked={this.state.boilOn} onClick={this.toggleBoilMode} /><label for="boil">Boil?</label><br />
-        {device.boilMode}
-
-        <label for="targetTemperature">Target Temperature</label><br />
-        <input name="targetTemperature" type="text" value={this.state.targetTemperature} onChange={this.handleTargetTemperatureChange} /><br />
-        <button onClick={this.handleSave}>Save</button>
-      </div>);
   },
 
   render() {
@@ -89,12 +74,20 @@ DeviceView = React.createClass({
 
         <CardText>
           <Toggle
-            name="toggleName1"
-            value="toggleValue1"
+            name="deviceActivated"
+            value="deviceActivated"
             label={this.state.deviceToggleLabel}
             style={{width: 200}}
             defaultToggled={this.state.activated}
             onToggle={this.onActivateToggled}/>
+
+          <Toggle
+            name="boilOn"
+            value="boilOn"
+            label="Boil?"
+            style={{width: 200}}
+            defaultToggled={this.state.boilOn}
+            onToggle={this.toggleBoilMode} />
 
           <TextField
             hintText="Enter Target Temperature"
@@ -102,7 +95,11 @@ DeviceView = React.createClass({
             onChange={this.handleTargetTemperatureChange}
             value={this.state.targetTemperature} />
 
-          <RaisedButton label="Save" style={{marginLeft: 16 }} primary={true} onClick={this.handleSave} />
+          <RaisedButton
+            label="Save"
+            style={{marginLeft: 16}}
+            primary={true}
+            onClick={this.handleSave} />
         </CardText>
       </Card>
     );
