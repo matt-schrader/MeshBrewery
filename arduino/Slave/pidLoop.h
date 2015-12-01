@@ -72,25 +72,46 @@ double isBoilMode() {
 
 void doPid(void) {
   unsigned long now = millis();
+  Input = reading.celsius;
   if(boilingMode) {
-    windowStartTime = now;
-    windowEndTime = now + BoilWindowSize;
-
-    if(Input < 9910) {
-      //if it's not close to boiling then keep it on permanently
-      killTime = windowEndTime + 1000; //add a second to the end time just to make sure it isn't switched off
+    if (windowStartTime == 0 || now > windowEndTime) {
+      windowStartTime = now;
+      windowEndTime = now + BoilWindowSize;
+  
+      if(Input < 9700) {
+        //if it's not close to boiling then keep it on permanently
+        killTime = windowEndTime + 1000; //add a second to the end time just to make sure it isn't switched off
+      } else {
+        //if we are in boil mode then run a phase cycle keeping the burner on for 60% of the time
+        killTime = now + (BoilWindowSize * 0.6);
+      }
+      
+      Serial.print("start:");
+      Serial.print(windowStartTime);
+      Serial.print(" input:");
+      Serial.print(Input);
+      Serial.print(" killing:");
+      Serial.println(killTime);
+    }
+    
+    if (windowStartTime <= now && killTime > now) {
+      digitalWrite(RelayPin, HIGH);
     } else {
-      //if we are in boil mode then run a phase cycle keeping the burner on for 60% of the time
-      killTime = now + (BoilWindowSize * 0.6);
+      digitalWrite(RelayPin, LOW);
     }
   } else if (Setpoint > 0) {
-    Input = reading.celsius;
     if (windowStartTime == 0 || now > windowEndTime) {
       myPID.Compute();
       
+      
       windowStartTime = now;
+
       windowEndTime = now + WindowSize;
-      killTime = now + Output;
+      if(Input <= Setpoint) {
+        killTime = now + Output;
+      } else {
+        killTime = now;
+      }
       
       Serial.print("start:");
       Serial.print(windowStartTime);
@@ -101,10 +122,10 @@ void doPid(void) {
       Serial.print(" killing:");
       Serial.println(killTime);
     }
-
+    
     if (windowStartTime <= now && killTime > now) {
       digitalWrite(RelayPin, HIGH);
-    } else if (now < windowEndTime) {
+    } else {
       digitalWrite(RelayPin, LOW);
     }
   } else {
