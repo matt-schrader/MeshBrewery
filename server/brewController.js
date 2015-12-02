@@ -40,8 +40,6 @@ var commands = {
 
     Fiber(function() {
       var nodeId = reading.nodeId;
-      console.log("ITTTTTTTT {nodeId: " + nodeId + "}");
-      console.log(reading.nodeId);
 
       logSensorReading(reading);
 
@@ -60,6 +58,7 @@ var commands = {
         if(device.boilOn && device.boilOn !== device.deviceBoilOn) {
           sendToSerialPort(command + "BOIL;");
         } else if(targetTemperature !== device.deviceTargetTemperature && !device.boilOn) {
+          var temp = device.targetTemperature || 0;
           sendToSerialPort(command + device.targetTemperature + ";");
         }
       } else {

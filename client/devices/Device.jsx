@@ -14,6 +14,7 @@ DeviceView = React.createClass({
   getInitialState() {
     return {
       targetTemperature: this.props.device.targetTemperature,
+      enteredTargetTemperature: this.convertToFahr(this.props.device.targetTemperature),
       boilOn: this.props.device.boilOn,
       deviceToggleLabel: 'Activate Device',
       activated: this.props.device.targetTemperature > 0
@@ -29,12 +30,41 @@ DeviceView = React.createClass({
   },
 
   handleSave() {
-    console.log("Doing the saving stuff");
     createOrUpdateDevice({
       nodeId: this.props.device.nodeId,
-      targetTemperature: this.state.targetTemperature,
+      targetTemperature: this.convertToCelsius(this.state.enteredTargetTemperature),
       boilOn: this.state.boilOn
+    });
+
+    this.setState({
+      enteredTargetTemperature: this.convertToFahr(this.state.targetTemperature)
     })
+  },
+
+  convertToFahr(celsius) {
+    if(isNaN(celsius)) {
+      return undefined;
+    }
+    return Math.round(((celsius / 100) * 1.8 + 32) * 10) / 10;
+  },
+
+  convertToCelsius(fahr) {
+    if(isNaN(fahr)) {
+      return undefined;
+    }
+    return Math.floor(((fahr - 32) * 5/9) * 100);
+  },
+
+  getTargetTemperature() {
+    return this.convertToFahr(this.state.targetTemperature);
+  },
+
+  getEnteredTargetTemperature() {
+    return this.state.enteredTargetTemperature;
+  },
+
+  getCurrentTemperature() {
+    return this.convertToFahr(this.props.device.currentTemperature);
   },
 
   toggleBoilMode(event) {
@@ -44,9 +74,9 @@ DeviceView = React.createClass({
   handleTargetTemperatureChange(event) {
     var temperature;
     if(event.target.value) {
-      temperature = parseInt(event.target.value);
+      temperature = event.target.value;
     }
-    this.setState({targetTemperature: temperature});
+    this.setState({enteredTargetTemperature: temperature});
   },
 
   onActivateToggled: function(event, toggled) {
@@ -56,7 +86,7 @@ DeviceView = React.createClass({
 
     if(!toggled) {
       this.setState({
-        targetTemperature: 0,
+        targetTemperature: undefined,
         boilOn: false
       })
     }
@@ -68,7 +98,7 @@ DeviceView = React.createClass({
     return (
       <Card>
         <CardHeader
-          title={this.props.device.currentTemperature}
+          title={this.getCurrentTemperature()}
           avatar={<Avatar style={{backgroundColor: deviceStateColor}}>{this.props.device.nodeId}</Avatar>}>
         </CardHeader>
 
@@ -93,7 +123,7 @@ DeviceView = React.createClass({
             hintText="Enter Target Temperature"
             floatingLabelText="Target Temperature"
             onChange={this.handleTargetTemperatureChange}
-            value={this.state.targetTemperature} />
+            value={this.getEnteredTargetTemperature()} />
 
           <RaisedButton
             label="Save"
