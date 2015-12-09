@@ -3,8 +3,13 @@
 //Define Variables we'll be connecting to
 double Input, Output, Setpoint;
 
+//PID targets
+const double aggressiveTargets[] = {30, 0, 20};
+const double moderateTargets[] = {22, 0, 15};
+const double mildTargets[] = {15, 0, 10};
+
 //Specify the links and initial tuning parameters
-PID myPID(&Input, &Output, &Setpoint, 15, 0, 10, DIRECT);
+PID myPID(&Input, &Output, &Setpoint, mildTargets[0], mildTargets[1], mildTargets[2], DIRECT);
 
 int WindowSize = 10000;
 int BoilWindowSize = 2000;
@@ -73,6 +78,7 @@ double isBoilMode() {
 void doPid(void) {
   unsigned long now = millis();
   Input = reading.celsius;
+  
   if(boilingMode) {
     if (windowStartTime == 0 || now > windowEndTime) {
       windowStartTime = now;
@@ -101,6 +107,15 @@ void doPid(void) {
     }
   } else if (Setpoint > 0) {
     if (windowStartTime == 0 || now > windowEndTime) {
+      if (Setpoint - Input  > 5) {
+        myPID.SetTunings(aggressiveTargets[0], aggressiveTargets[1], aggressiveTargets[2]);
+      } else if(Setpoint - Input  > 2) {
+        myPID.SetTunings(moderateTargets[0], moderateTargets[1], moderateTargets[2]);
+      } else {
+        myPID.SetTunings(mildTargets[0], mildTargets[1], mildTargets[2]);
+      }
+
+      
       myPID.Compute();
       
       
