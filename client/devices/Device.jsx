@@ -30,6 +30,7 @@ DeviceView = React.createClass({
   },
 
   handleSave() {
+
     createOrUpdateDevice({
       nodeId: this.props.device.nodeId,
       targetTemperature: this.convertToCelsius(this.state.enteredTargetTemperature),
@@ -86,7 +87,7 @@ DeviceView = React.createClass({
 
     if(!toggled) {
       this.setState({
-        targetTemperature: undefined,
+        enteredTargetTemperature: undefined,
         boilOn: false
       })
     }
