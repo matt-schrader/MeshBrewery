@@ -13,7 +13,6 @@ var { Colors } = MUI.Styles;
 DeviceView = React.createClass({
   getInitialState() {
     return {
-      targetTemperature: this.props.device.targetTemperature,
       enteredTargetTemperature: this.convertToFahr(this.props.device.targetTemperature),
       boilOn: this.props.device.boilOn,
       deviceToggleLabel: 'Activate Device',
@@ -36,10 +35,6 @@ DeviceView = React.createClass({
       targetTemperature: this.convertToCelsius(this.state.enteredTargetTemperature),
       boilOn: this.state.boilOn
     });
-
-    this.setState({
-      enteredTargetTemperature: this.convertToFahr(this.state.targetTemperature)
-    })
   },
 
   convertToFahr(celsius) {
@@ -54,10 +49,6 @@ DeviceView = React.createClass({
       return undefined;
     }
     return Math.floor(((fahr - 32) * 5/9) * 100);
-  },
-
-  getTargetTemperature() {
-    return this.convertToFahr(this.state.targetTemperature);
   },
 
   getEnteredTargetTemperature() {
