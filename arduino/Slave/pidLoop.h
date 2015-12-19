@@ -12,7 +12,7 @@ const double mildTargets[] = {15, 0, 10};
 PID myPID(&Input, &Output, &Setpoint, mildTargets[0], mildTargets[1], mildTargets[2], DIRECT);
 
 int WindowSize = 10000;
-int BoilWindowSize = 2000;
+int BoilWindowSize = 4000;
 unsigned long windowStartTime = 0;
 unsigned long windowEndTime = 0;
 unsigned long killTime = 0;
@@ -75,6 +75,7 @@ double isBoilMode() {
   return boilingMode;
 }
 
+bool wroteoff = false;
 void doPid(void) {
   unsigned long now = millis();
   Input = reading.celsius;
@@ -101,8 +102,13 @@ void doPid(void) {
     }
     
     if (windowStartTime <= now && killTime > now) {
+      wroteoff = false;
       digitalWrite(RelayPin, HIGH);
     } else {
+      if(!wroteoff) {
+        Serial.println("Turning off burner");
+        wroteoff = true;
+      }
       digitalWrite(RelayPin, LOW);
     }
   } else if (Setpoint > 0) {
